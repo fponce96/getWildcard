@@ -1,92 +1,70 @@
 
 # getWildcard
 
-> 🌐 Automated wildcard SSL certificate generator using Certbot and CoreDNS  
-> 🌐 Generador automatizado de certificados SSL wildcard usando Certbot y CoreDNS
+Generate a wildcard SSL certificate using Certbot with manual DNS-01 challenge, integrated with a local CoreDNS server.
+
+Genera un certificado SSL wildcard usando Certbot con el desafío DNS-01 manual, integrado con un servidor CoreDNS local.
 
 ---
 
-## 📖 Description / Descripción
+## 📋 Description / Descripción
 
-**English:**  
-`getWildcard` is a Bash script designed to automate the process of obtaining Let's Encrypt wildcard SSL certificates using the DNS-01 challenge. It updates the CoreDNS zone file, increments the serial number in the SOA record, reloads the DNS server, and verifies TXT record propagation across multiple DNS resolvers before finalizing the certificate generation.
+This script automates the process of requesting a wildcard certificate from Let's Encrypt using the DNS-01 challenge.  
+It updates the zone file, increases the serial number, verifies TXT propagation across multiple public DNS resolvers, and reloads the CoreDNS server.
 
-**Español:**  
-`getWildcard` es un script en Bash que automatiza la obtención de certificados SSL wildcard de Let's Encrypt usando el desafío DNS-01. Actualiza el archivo de zona de CoreDNS, incrementa el número de serie en el registro SOA, recarga el servidor DNS y verifica la propagación del registro TXT en múltiples resolvers DNS antes de finalizar la generación del certificado.
-
----
-
-## 🚀 Features / Características
-
-- Manual DNS-01 ACME challenge automation.
-- Edits CoreDNS zone files.
-- Serial number formatted as `YYMMDDHHMM`.
-- Verifies TXT record with `dig` against multiple public DNS servers.
-- Handles wildcard certificates (`*.yourdomain.com`).
-- Saves certificates to a custom directory per domain.
-- Safe: asks confirmation before overwriting existing certs.
+Este script automatiza el proceso de solicitud de un certificado wildcard desde Let's Encrypt usando el desafío DNS-01.  
+Actualiza el archivo de zona, incrementa el número de serie, verifica la propagación del TXT en múltiples DNS públicos y recarga el servidor CoreDNS.
 
 ---
 
-## 🛠 Requirements / Requisitos
+## 📦 Requirements / Requisitos
 
-- `bash`
-- `docker` and `docker-compose`
-- `certbot`
-- `dig` (from `dnsutils` or `bind-tools`)
-- `sudo` (optional, needed for installing missing tools)
+- Bash
+- Docker
+- Docker Compose
+- `dig` utility (dnsutils or bind-tools)
+- `certbot` installed locally (not via Docker)
+- A running CoreDNS server configured as in [`@fponce96/coredns`](https://github.com/fponce96/coredns)
+
+Este script asume que el servidor DNS está corriendo [CoreDNS](https://coredns.io/) y configurado con el proyecto [`@fponce96/coredns`](https://github.com/fponce96/coredns).  
+Asegúrate de que el contenedor DNS esté en ejecución y que los archivos de zona estén montados correctamente y sean editables.
 
 ---
 
-## 📦 Installation / Instalación
+## 🚀 Usage / Uso
 
 ```bash
-git clone https://github.com/fponce96/getWildcard.git
-cd getWildcard
-chmod +x generate.sh
+./getWildcard.sh example.com
+```
+
+If the wildcard directory for the domain already exists, the script will ask for confirmation before deleting it.
+
+Si el directorio wildcard para el dominio ya existe, el script pedirá confirmación antes de eliminarlo.
+
+---
+
+## 📁 Output / Salida
+
+Certificates are stored under:
+
+```
+~/certs/example.com/
 ```
 
 ---
 
-## ✅ Usage / Uso
+## 🔐 Notes / Notas
 
-```bash
-./generate.sh yourdomain.com
-```
+The script validates DNS propagation before Certbot continues, avoiding failed verifications.  
+It also verifies that the TXT record matches the required ACME challenge token.
 
-> Certificates will be saved to: `./certs/yourdomain.com/`
-
-> Los certificados se guardarán en: `./certs/yourdomain.com/`
+El script valida la propagación DNS antes de que Certbot continúe, evitando fallas en la verificación.  
+También valida que el registro TXT coincida con el token entregado por ACME.
 
 ---
 
-## 🧪 Validation / Validación
+## 🛠️ Author / Autor
 
-The script:
-1. Extracts the ACME token from Certbot.
-2. Inserts the token into the CoreDNS zone as a TXT record.
-3. Increments the serial in the SOA.
-4. Restarts CoreDNS (via Docker Compose).
-5. Uses `dig` with multiple public resolvers (e.g., Google, Cloudflare) to confirm propagation.
-6. If all pass, Certbot completes and certificates are saved.
+Maintained by [fponce96](https://github.com/fponce96)
 
 ---
-
-## 🔐 Example output / Ejemplo de salida
-
-```bash
-Certificate for *.example.com successfully generated!
-Saved to: ./certs/example.com/
-```
-
----
-
-## 🧾 License / Licencia
-
-MIT License
-
----
-
-## ✒️ Author / Autor
-
-**Facundo Ponce** – [@fponce96](https://github.com/fponce96)
